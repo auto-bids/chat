@@ -3,6 +3,7 @@ package main
 import (
 	"chat/Client"
 	"chat/Server"
+	"chat/Controllers"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
@@ -12,15 +13,9 @@ import (
 func main() {
 	server := Server.Server{Clients: make(map[*Client.Client]bool)}
 	app := gin.Default()
-	app.GET("/ws", func(c *gin.Context) {
-		ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-		defer ws.Close()
-		if err != nil {
-			log.Println("websocket upgrade error: ", err)
-			return
-		}
-		client := Client.Client{Socket: ws}
-		server.AddClient(&client)
+	app.GET("/ws/:id", Controllers.JoinRoom {
+
+		server.AddClient(&Client.Client{Socket: ws})
 		for {
 			mt, message, err := ws.ReadMessage()
 			server.Broadcast(mt, message)
