@@ -1,7 +1,16 @@
 package Server
 
 type Server struct {
-	Rooms      map[string]*Room
-	RemoveRoom chan string
-	AddRoom    chan string
+	Clients map[string]*Room
+}
+
+func CreateServer() *Server {
+	return &Server{
+		Clients: make(map[string]*Room),
+	}
+}
+func (s Server) AddRoom(name string) {
+	room := CreateRoom(name, &s)
+	s.Clients[name] = room
+	go Run(room)
 }
