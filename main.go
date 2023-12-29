@@ -19,12 +19,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	app.GET("/chat", func(ctx *gin.Context) {
-		ws, err := Controllers.Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		defer ws.Close()
-		if err != nil {
-			log.Println("websocket upgrade error: ", err)
-			return
-		}
+		Controllers.ManageWs(server, ctx)
 	})
 
 	log.Fatal(app.Run(os.Getenv("PORT")))
