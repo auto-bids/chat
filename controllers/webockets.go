@@ -1,7 +1,7 @@
-package Controllers
+package controllers
 
 import (
-	"chat/Server"
+	"chat/server"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
@@ -14,14 +14,12 @@ var Upgrader = websocket.Upgrader{
 	},
 }
 
-func ManageWs(s *Server.Server, ctx *gin.Context) {
-	room := ctx.Request.Header["Room"][0]
+func ManageWs(s *server.Server, ctx *gin.Context) {
 	ws, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		log.Println("websocket upgrade error: ", err)
 		return
 	}
-	client := Server.NewClient(ws, ctx)
+	client := server.NewClient(ws, ctx)
 	go client.HandleMessages()
-	s.AddClientToRoom(s.GetRoom(room), client)
 }

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"chat/Controllers"
-	"chat/Server"
+	"chat/controllers"
+	"chat/server"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	app := gin.Default()
-	server := Server.CreateServer()
+	server := server.CreateServer()
 	server.AddRoom("test1")
 	server.AddRoom("test2")
 	err := godotenv.Load(".env")
@@ -19,7 +19,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	app.GET("/chat", func(ctx *gin.Context) {
-		Controllers.ManageWs(server, ctx)
+		controllers.ManageWs(server, ctx)
 	})
 
 	log.Fatal(app.Run(os.Getenv("PORT")))

@@ -1,22 +1,27 @@
-package Server
+package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	Socket *websocket.Conn
-	Room   *Room
-	Close  chan string
-	userID string
+	Socket     *websocket.Conn
+	ReadMess   chan Message
+	WrtiteMess chan Message
+	Server     *Server
+	UserID     string
+	Close      chan string
 }
 
 func (c *Client) HandleMessages() {
 	for {
 		_, read, _ := c.Socket.ReadMessage()
-		c.Room.Broadcast <- read
+		mess := Message{}
+		json.Unmarshal(read, &mess)
+		fmt.Println(mess)
 	}
 }
 
@@ -26,7 +31,9 @@ func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
 	return &Client{
 		Socket: socket,
 		Close:  make(chan string),
-		userID: username,
+		UserID: username,
 	}
+}
+func subscribeRoom(roomId string) {
 
 }
