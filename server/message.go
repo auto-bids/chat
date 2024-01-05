@@ -12,15 +12,15 @@ type Message struct {
 	Options     string `json:"options"`
 }
 
-func ByteToMessage(read []byte) Message {
+func ByteToMessage(read []byte) *Message {
 	mess := Message{}
 	json.Unmarshal(read, &mess)
-	return mess
+	return &mess
 }
-func messageToByte(read *Message) []byte {
+func MessageToByte(read *Message) *[]byte {
 	byteMessage, err := json.Marshal(read)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return byteMessage
+	return &byteMessage
 }

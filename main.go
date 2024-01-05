@@ -11,16 +11,20 @@ import (
 
 func main() {
 	app := gin.Default()
-	server := server.CreateServer()
-	server.AddRoom("test1")
-	server.AddRoom("test2")
+	Server := server.CreateServer()
+	Ra := server.CreateRoom("test1", Server)
+	Rb := server.CreateRoom("test2", Server)
+	go Rb.RunRoom()
+	go Ra.RunRoom()
+	Server.AddRoom(Ra)
+	Server.AddRoom(Rb)
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 	app.GET("/chat", func(ctx *gin.Context) {
-		controllers.ManageWs(server, ctx)
+		controllers.ManageWs(Server, ctx)
 	})
-
 	log.Fatal(app.Run(os.Getenv("PORT")))
 }

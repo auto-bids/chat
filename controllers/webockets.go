@@ -9,6 +9,8 @@ import (
 )
 
 var Upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -17,9 +19,12 @@ var Upgrader = websocket.Upgrader{
 func ManageWs(s *server.Server, ctx *gin.Context) {
 	ws, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
-		log.Println("websocket upgrade error: ", err)
+		log.Println("websocket upg-ade error: ", err)
 		return
 	}
 	client := server.NewClient(ws, ctx)
-	go client.HandleMessages()
+	s.AddClient(client)
+	client.Server = s
+	go client.WritePump()
+	go client.ReadPump()
 }
