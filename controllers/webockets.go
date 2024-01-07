@@ -19,7 +19,7 @@ var Upgrader = websocket.Upgrader{
 func ManageWs(s *server.Server, ctx *gin.Context) {
 	ws, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
-		log.Println("websocket upg-ade error: ", err)
+		log.Fatal(err)
 		return
 	}
 	client := server.NewClient(ws, ctx)

@@ -1,9 +1,5 @@
 package server
 
-import (
-	"errors"
-)
-
 type Server struct {
 	Rooms  map[string]*Room
 	Client map[*Client]bool
@@ -15,16 +11,23 @@ func CreateServer() *Server {
 		Client: make(map[*Client]bool),
 	}
 }
-func (s *Server) AddRoom(room *Room) {
+func (s *Server) AddRoom(roomId string) *Room {
+	room := CreateRoom(roomId, s)
+	go room.RunRoom()
 	s.Rooms[room.id] = room
+	return room
 }
-func (s *Server) GetRoom(name string) (*Room, error) {
+func (s *Server) RemoveRoom(roomId string) {
+	s.Rooms[roomId].Stop <- true
+	delete(s.Rooms, roomId)
+}
+func (s *Server) GetRoom(name string) *Room {
 	var room *Room
 	room = s.Rooms[name]
 	if room == nil {
-		return nil, errors.New("no such room")
+		return nil
 	}
-	return room, nil
+	return room
 }
 func (s *Server) AddClient(client *Client) {
 	s.Client[client] = true

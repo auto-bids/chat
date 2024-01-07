@@ -44,20 +44,17 @@ func (c *Client) sendToServer(roomId string, mess *Message) {
 	c.Rooms[roomId].Broadcast <- mess
 }
 func (c *Client) subscribeRoom(roomId string) error {
-	room, err := c.Server.GetRoom(roomId)
-	if err != nil {
-		return err
+	room := c.Server.GetRoom(roomId)
+	if room == nil {
+		room = c.Server.AddRoom(roomId)
 	}
 	c.Rooms[roomId] = room
 	room.AddUser <- c
 	return nil
 }
 func (c *Client) unsubscribeRoom(roomId string) error {
-	room, err := c.Server.GetRoom(roomId)
+	room := c.Server.GetRoom(roomId)
 	fmt.Println(room)
-	if err != nil {
-		return err
-	}
 	delete(c.Rooms, roomId)
 	room.RemoveUser <- c
 	return nil
@@ -88,6 +85,7 @@ func (c *Client) ReadPump() {
 			c.sendToServer(mess.Destination, mess)
 		default:
 		}
+		time.Sleep(time.Millisecond)
 	}
 }
 func (c *Client) WritePump() {
@@ -125,5 +123,6 @@ func (c *Client) WritePump() {
 				return
 			}
 		}
+		time.Sleep(time.Millisecond)
 	}
 }
