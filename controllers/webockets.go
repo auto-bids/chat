@@ -4,6 +4,7 @@ import (
 	"chat/server"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
 )
@@ -16,7 +17,7 @@ var Upgrader = websocket.Upgrader{
 	},
 }
 
-func ManageWs(s *server.Server, ctx *gin.Context) {
+func ManageWs(s *server.Server, ctx *gin.Context, db *mongo.Client) {
 	ws, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		log.Fatal(err)

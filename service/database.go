@@ -1,6 +1,7 @@
-package main
+package service
 
 import (
+	"chat/server"
 	"context"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -11,13 +12,7 @@ import (
 	"time"
 )
 
-type Trainer struct {
-	Name string
-	Age  int
-	City string
-}
-
-func connectDB() {
+func ConnectDB() *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	err := godotenv.Load()
@@ -33,4 +28,23 @@ func connectDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return client
+}
+
+func sendMessage(conn *mongo.Client, roomId string, message *server.Message) *mongo.InsertOneResult {
+	one, err := conn.Database("chat").Collection("messages").InsertOne(context.TODO(), message)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return one
+}
+func addRoom(conn *mongo.Client, roomId string) *mongo.InsertOneResult {
+	one, err := conn.Database("chat").Collection("room").InsertOne(context.TODO(), roomId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return one
+}
+func getMessages(conn *mongo.Client, roomId string, message *server.Message) *mongo.InsertOneResult {
+
 }
