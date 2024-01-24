@@ -1,7 +1,6 @@
 package service
 
 import (
-	"chat/server"
 	"context"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -31,20 +30,8 @@ func ConnectDB() *mongo.Client {
 	return client
 }
 
-func sendMessage(conn *mongo.Client, roomId string, message *server.Message) *mongo.InsertOneResult {
-	one, err := conn.Database("chat").Collection("messages").InsertOne(context.TODO(), message)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return one
-}
-func addRoom(conn *mongo.Client, roomId string) *mongo.InsertOneResult {
-	one, err := conn.Database("chat").Collection("room").InsertOne(context.TODO(), roomId)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return one
-}
-func getMessages(conn *mongo.Client, roomId string, message *server.Message) *mongo.InsertOneResult {
+var DB = ConnectDB()
 
+func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	return client.Database(os.Getenv("DB")).Collection(collectionName)
 }
