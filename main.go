@@ -21,7 +21,7 @@ func main() {
 	app.GET("/chat", func(ctx *gin.Context) {
 		controllers.ManageWs(Server, ctx, db)
 	})
-	app.POST("/chat/addroom", controllers.createRoom)
+	app.POST("/chat/addroom", controllers.CreateRoom)
 	log.Fatal(app.Run(os.Getenv("PORT")))
 
 }

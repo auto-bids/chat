@@ -1,6 +1,7 @@
 package server
 
 import (
+	"chat/models"
 	"chat/service"
 	"context"
 	"encoding/json"
@@ -56,13 +57,8 @@ func (r *Room) sendMessage(message *Message) {
 	defer cancel()
 	roomCollection := service.GetCollection(service.DB, "rooms")
 	filter := bson.D{{"id", r.id}}
-	update := bson.D{
-		{"$push", bson.D{
-			{"sender", message.Sender},
-			{"message", message.Message},
-		},
-		},
-	}
+	data := models.MessageDB{Sender: message.Sender, Message: message.Message, Time: time.Now().Unix()}
+	update := bson.M{"$push": bson.M{"messages": data}}
 	_, err := roomCollection.UpdateOne(ctx, filter, update)
 	//TODO - result
 	if err == nil {

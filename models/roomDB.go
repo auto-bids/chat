@@ -1,8 +1,8 @@
 package models
 
 type RoomDB struct {
-	id       string        `bson:"id"`
-	name     string        `bson:"name"`
-	users    []string      `bson:"users"`
-	messages []interface{} `bson:"messages"`
+	Id       string      `bson:"Id"`
+	Name     string      `bson:"Name"`
+	Users    []string    `bson:"Users"`
+	Messages []MessageDB `bson:"Messages"`
 }
