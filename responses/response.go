@@ -1,6 +1,7 @@
 package responses
 
 type Response struct {
-	Status  int    `json:"Status"`
-	Message string `json:"Message"`
+	Status  int                    `json:"status"`
+	Message string                 `json:"message"`
+	Data    map[string]interface{} `json:"data"`
 }

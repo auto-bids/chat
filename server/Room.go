@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func (r *Room) AddClient(client *Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	roomCollection := service.GetCollection(service.DB, "rooms")
-	filter := bson.D{{"id", r.id}, {"users.username", client.UserID}}
+	filter := bson.D{{"_id", r.id}, {"users.username", client.UserID}}
 	err := roomCollection.FindOne(ctx, filter)
 	if err == nil {
 		r.Clients[client] = true
@@ -56,10 +57,14 @@ func (r *Room) sendMessage(message *Message) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	roomCollection := service.GetCollection(service.DB, "rooms")
-	filter := bson.D{{"id", r.id}}
+	id, _ := primitive.ObjectIDFromHex(r.id)
+	filter := bson.D{{"_id", id}}
+	var room models.RoomDB
+	roomCollection.FindOne(ctx, bson.D{{"_id", id}}).Decode(&room)
 	data := models.MessageDB{Sender: message.Sender, Message: message.Message, Time: time.Now().Unix()}
 	update := bson.M{"$push": bson.M{"messages": data}}
 	_, err := roomCollection.UpdateOne(ctx, filter, update)
+
 	//TODO - result
 	if err == nil {
 		for client := range r.Clients {

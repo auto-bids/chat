@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
@@ -31,7 +30,6 @@ var (
 
 func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
 	username := ctx.Request.Header["Username"][0]
-	fmt.Println(username)
 	return &Client{
 		Socket:    socket,
 		Close:     make(chan string),
@@ -54,7 +52,6 @@ func (c *Client) subscribeRoom(roomId string) error {
 }
 func (c *Client) unsubscribeRoom(roomId string) error {
 	room := c.Server.GetRoom(roomId)
-	fmt.Println(room)
 	delete(c.Rooms, roomId)
 	room.RemoveUser <- c
 	return nil
@@ -79,6 +76,7 @@ func (c *Client) ReadPump() {
 		switch mess.Options {
 		case "subscribe":
 			c.subscribeRoom(mess.Destination)
+
 		case "unsubscribe":
 			c.unsubscribeRoom(mess.Destination)
 		case "message":

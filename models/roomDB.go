@@ -1,8 +1,14 @@
 package models
 
 type RoomDB struct {
-	Id       string      `bson:"Id"`
-	Name     string      `bson:"Name"`
-	Users    []string    `bson:"Users"`
-	Messages []MessageDB `bson:"Messages"`
+	Id       string      `bson:"_id" json:"_id"`
+	Name     string      `bson:"name" json:"name"`
+	Users    []string    `bson:"users" json:"users"`
+	Messages []MessageDB `bson:"messages" json:"messages"`
+}
+
+type PostRoomDB struct {
+	Name     string      `bson:"name" json:"name"`
+	Users    []string    `bson:"users" json:"users"`
+	Messages []MessageDB `bson:"messages" json:"messages"`
 }

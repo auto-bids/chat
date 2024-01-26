@@ -28,4 +28,5 @@ func ManageWs(s *server.Server, ctx *gin.Context, db *mongo.Client) {
 	client.Server = s
 	go client.WritePump()
 	go client.ReadPump()
+
 }
