@@ -26,6 +26,7 @@ func CreateUser(ctx *gin.Context) {
 				Message: "Invalid request body",
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
+			return
 		}
 		if err := validate.Struct(user); err != nil {
 			result <- responses.Response{
@@ -33,6 +34,7 @@ func CreateUser(ctx *gin.Context) {
 				Message: "Error validation user",
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
+			return
 		}
 		var userCollection = service.GetCollection(service.DB, "users")
 		filter := bson.D{{"email", user.Email}}
@@ -43,7 +45,23 @@ func CreateUser(ctx *gin.Context) {
 				Message: "user exists",
 				Data:    map[string]interface{}{},
 			}
+			return
+		}
+		res, err := userCollection.InsertOne(ctxDB, user)
+		if err != nil {
+			result <- responses.Response{
+				Status:  http.StatusBadRequest,
+				Message: "error adding user",
+				Data:    map[string]interface{}{"error": err},
+			}
+			return
+		}
+		result <- responses.Response{
+			Status:  http.StatusCreated,
+			Message: "added user",
+			Data:    map[string]interface{}{"data": res},
 		}
 	}(ctx.Copy())
-
+	res := <-result
+	ctx.JSON(res.Status, res)
 }
