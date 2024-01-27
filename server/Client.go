@@ -38,13 +38,19 @@ func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
 		UserID:    username,
 	}
 }
-func (c *Client) sendToServer(roomId string, mess *Message) {
-	c.Rooms[roomId].Broadcast <- mess
+func (c *Client) sendToServer(mess *Message) {
+	if c.Rooms[mess.Destination] == nil {
+		c.WriteMess <- []byte("unauthorized")
+		return
+	}
+	c.Rooms[mess.Destination].Broadcast <- mess
 }
 func (c *Client) subscribeRoom(roomId string) error {
 	room := c.Server.GetRoom(roomId)
 
 	if room == nil {
+		//var user models.UserDB
+		//userCollection := service.GetCollection()
 		room = c.Server.AddRoom(roomId)
 	}
 	c.Rooms[roomId] = room
@@ -74,13 +80,14 @@ func (c *Client) ReadPump() {
 			break
 		}
 		mess := ByteToMessage(message)
+		mess.Sender = c.UserID
 		switch mess.Options {
 		case "subscribe":
 			c.subscribeRoom(mess.Destination)
 		case "unsubscribe":
 			c.unsubscribeRoom(mess.Destination)
 		case "message":
-			c.sendToServer(mess.Destination, mess)
+			c.sendToServer(mess)
 		default:
 		}
 		time.Sleep(time.Millisecond)

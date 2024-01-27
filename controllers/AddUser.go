@@ -38,7 +38,8 @@ func CreateUser(ctx *gin.Context) {
 		}
 		var userCollection = service.GetCollection(service.DB, "users")
 		filter := bson.D{{"email", user.Email}}
-		err := userCollection.FindOne(ctxDB, filter)
+		var existingUser models.UserDB
+		err := userCollection.FindOne(ctxDB, filter).Decode(&existingUser)
 		if err == nil {
 			result <- responses.Response{
 				Status:  http.StatusBadRequest,

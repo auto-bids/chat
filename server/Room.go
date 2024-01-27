@@ -35,12 +35,14 @@ func (r *Room) AddClient(client *Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	roomCollection := service.GetCollection(service.DB, "rooms")
-	filter := bson.D{{"_id", r.id}, {"users.username", client.UserID}}
-	err := roomCollection.FindOne(ctx, filter)
-	if err == nil {
-		r.Clients[client] = true
-
+	id, _ := primitive.ObjectIDFromHex(r.id)
+	filter := bson.D{{"_id", id}, {"users", client.UserID}}
+	var room models.RoomDB
+	err := roomCollection.FindOne(ctx, filter).Decode(&room)
+	if err != nil {
+		return
 	}
+	r.Clients[client] = true
 }
 func (r *Room) RemoveClient(client *Client) {
 	delete(r.Clients, client)
@@ -54,25 +56,26 @@ func (r *Room) GetClient(client string) *Client {
 	return nil
 }
 func (r *Room) sendMessage(message *Message) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	roomCollection := service.GetCollection(service.DB, "rooms")
-	id, _ := primitive.ObjectIDFromHex(r.id)
-	filter := bson.D{{"_id", id}}
-	var room models.RoomDB
-	roomCollection.FindOne(ctx, bson.D{{"_id", id}}).Decode(&room)
-	data := models.MessageDB{Sender: message.Sender, Message: message.Message, Time: time.Now().Unix()}
-	update := bson.M{"$push": bson.M{"messages": data}}
-	_, err := roomCollection.UpdateOne(ctx, filter, update)
-
-	//TODO - result
-	if err == nil {
-		for client := range r.Clients {
-			client.WriteMess <- *MessageToByte(message)
+	if r.GetClient(message.Sender) != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		roomCollection := service.GetCollection(service.DB, "rooms")
+		id, _ := primitive.ObjectIDFromHex(r.id)
+		filter := bson.D{{"_id", id}}
+		var room models.RoomDB
+		roomCollection.FindOne(ctx, bson.D{{"_id", id}}).Decode(&room)
+		data := models.MessageDB{Sender: message.Sender, Message: message.Message, Time: time.Now().Unix()}
+		update := bson.M{"$push": bson.M{"messages": data}}
+		_, err := roomCollection.UpdateOne(ctx, filter, update)
+		//TODO - result
+		if err == nil {
+			for client := range r.Clients {
+				client.WriteMess <- *MessageToByte(message)
+			}
+		} else {
+			//TODO - responses
+			r.GetClient(message.Sender).WriteMess <- []byte("error")
 		}
-	} else {
-		//TODO - responses
-		r.GetClient(message.Sender).WriteMess <- []byte("error")
 	}
 
 }

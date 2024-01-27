@@ -32,6 +32,3 @@ func (s *Server) GetRoom(name string) *Room {
 func (s *Server) AddClient(client *Client) {
 	s.Client[client] = true
 }
-func (s *Server) AddClientToRoom(r *Room, c *Client) {
-	r.AddUser <- c
-}
