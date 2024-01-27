@@ -43,6 +43,7 @@ func (c *Client) sendToServer(roomId string, mess *Message) {
 }
 func (c *Client) subscribeRoom(roomId string) error {
 	room := c.Server.GetRoom(roomId)
+
 	if room == nil {
 		room = c.Server.AddRoom(roomId)
 	}
@@ -76,7 +77,6 @@ func (c *Client) ReadPump() {
 		switch mess.Options {
 		case "subscribe":
 			c.subscribeRoom(mess.Destination)
-
 		case "unsubscribe":
 			c.unsubscribeRoom(mess.Destination)
 		case "message":

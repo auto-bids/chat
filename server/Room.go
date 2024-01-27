@@ -4,7 +4,6 @@ import (
 	"chat/models"
 	"chat/service"
 	"context"
-	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -40,6 +39,7 @@ func (r *Room) AddClient(client *Client) {
 	err := roomCollection.FindOne(ctx, filter)
 	if err == nil {
 		r.Clients[client] = true
+
 	}
 }
 func (r *Room) RemoveClient(client *Client) {
@@ -82,9 +82,7 @@ func (r *Room) RunRoom() {
 		case message := <-r.Broadcast:
 			r.sendMessage(message)
 		case user := <-r.AddUser:
-			r.Clients[user] = true
-			mess, _ := json.Marshal(Message{Message: "dołączono do pokoju " + r.id})
-			user.WriteMess <- mess
+			r.AddClient(user)
 		case key := <-r.RemoveUser:
 			delete(r.Clients, key)
 		case <-r.Stop:
