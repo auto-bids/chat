@@ -7,8 +7,13 @@ type RoomDB struct {
 	Messages []MessageDB `bson:"messages" json:"messages"`
 }
 
+type PostPrivateRoomDB struct {
+	Name  string   `bson:"name" json:"name"`
+	Users []string `bson:"users" json:"users" validate:"required,min=1,max=1,email"`
+}
+
 type PostRoomDB struct {
 	Name     string      `bson:"name" json:"name"`
-	Users    []string    `bson:"users" json:"users"`
+	Users    []string    `bson:"users" json:"users" validate:"required,min=1,max=1,email"`
 	Messages []MessageDB `bson:"messages" json:"messages"`
 }
