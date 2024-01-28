@@ -1,34 +1,34 @@
 package server
 
 type Server struct {
-	Rooms  map[string]*Room
-	Client map[*Client]bool
+	Rooms   map[string]*Room
+	Clients map[*Client]bool
 }
 
 func CreateServer() *Server {
 	return &Server{
-		Rooms:  make(map[string]*Room),
-		Client: make(map[*Client]bool),
+		Rooms:   make(map[string]*Room),
+		Clients: make(map[*Client]bool),
 	}
 }
-func (s *Server) AddRoom(roomId string) *Room {
-	room := CreateRoom(roomId, s)
+func (s *Server) AddRoom(id string) *Room {
+	room := CreateRoom(id, s)
 	go room.RunRoom()
 	s.Rooms[room.id] = room
 	return room
 }
-func (s *Server) RemoveRoom(roomId string) {
-	s.Rooms[roomId].Stop <- true
-	delete(s.Rooms, roomId)
+func (s *Server) RemoveRoom(id string) {
+	s.Rooms[id].Stop <- true
+	delete(s.Rooms, id)
 }
-func (s *Server) GetRoom(name string) *Room {
+func (s *Server) GetRoom(id string) *Room {
 	var room *Room
-	room = s.Rooms[name]
+	room = s.Rooms[id]
 	if room == nil {
 		return nil
 	}
 	return room
 }
 func (s *Server) AddClient(client *Client) {
-	s.Client[client] = true
+	s.Clients[client] = true
 }

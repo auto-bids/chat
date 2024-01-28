@@ -1,8 +1,14 @@
 package server
 
 import (
+	"chat/models"
+	"chat/service"
+	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"time"
 )
@@ -38,7 +44,7 @@ func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
 		UserID:    username,
 	}
 }
-func (c *Client) sendToServer(mess *Message) {
+func (c *Client) sendToRoom(mess *Message) {
 	if c.Rooms[mess.Destination] == nil {
 		c.WriteMess <- []byte("unauthorized")
 		return
@@ -46,12 +52,20 @@ func (c *Client) sendToServer(mess *Message) {
 	c.Rooms[mess.Destination].Broadcast <- mess
 }
 func (c *Client) subscribeRoom(roomId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var user models.UserDB
+	roomCollection := service.GetCollection(service.DB, "rooms")
+	id, _ := primitive.ObjectIDFromHex(roomId)
+	filter := bson.D{{"_id", id}, {"users", c.UserID}}
+	err := roomCollection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		fmt.Println("ta")
+		return err
+	}
 	room := c.Server.GetRoom(roomId)
-
 	if room == nil {
-		//var user models.UserDB
-		//userCollection := service.GetCollection()
-		room = c.Server.AddRoom(roomId)
+		c.Server.AddRoom(roomId)
 	}
 	c.Rooms[roomId] = room
 	room.AddUser <- c
@@ -87,7 +101,7 @@ func (c *Client) ReadPump() {
 		case "unsubscribe":
 			c.unsubscribeRoom(mess.Destination)
 		case "message":
-			c.sendToServer(mess)
+			c.sendToRoom(mess)
 		default:
 		}
 		time.Sleep(time.Millisecond)

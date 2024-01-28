@@ -10,7 +10,7 @@ import (
 )
 
 type Room struct {
-	id         string `bson:"id"`
+	id         string
 	Clients    map[*Client]bool
 	Server     *Server
 	Stop       chan bool
