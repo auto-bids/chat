@@ -76,7 +76,12 @@ func (c *Client) unsubscribeRoom(roomId string) error {
 	room.RemoveUser <- c
 	return nil
 }
-
+func (c *Client) closeConnection() {
+	for _, room := range c.Rooms {
+		room.RemoveUser <- c
+	}
+	delete(c.Server.Clients, c)
+}
 func (c *Client) ReadPump() {
 	defer func() {
 		c.Socket.Close()
@@ -89,6 +94,7 @@ func (c *Client) ReadPump() {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
+				c.closeConnection()
 			}
 			break
 		}

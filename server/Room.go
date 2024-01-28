@@ -40,8 +40,10 @@ func (r *Room) AddClient(client *Client) {
 	var room models.RoomDB
 	err := roomCollection.FindOne(ctx, filter).Decode(&room)
 	if err != nil {
+		client.WriteMess <- []byte("unauthorized")
 		return
 	}
+	client.WriteMess <- []byte(r.id)
 	r.Clients[client] = true
 }
 func (r *Room) RemoveClient(client *Client) {
@@ -87,6 +89,9 @@ func (r *Room) RunRoom() {
 			r.AddClient(user)
 		case key := <-r.RemoveUser:
 			delete(r.Clients, key)
+			if len(r.Clients) == 0 {
+				return
+			}
 		case <-r.Stop:
 			return
 		default:

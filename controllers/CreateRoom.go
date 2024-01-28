@@ -7,6 +7,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
 	"time"
 )
@@ -35,9 +36,25 @@ func CreateRoom(c *gin.Context) {
 			}
 			return
 		}
-		room.Messages = []models.MessageDB{}
-		room.Users = append(room.Users, ctx.Request.Header["Email"][0])
 		var collection = service.GetCollection(service.DB, "rooms")
+		var usersCollection = service.GetCollection(service.DB, "users")
+		var user models.UserDB
+		email := room.Users[0]
+		err := usersCollection.FindOne(ctxDB, bson.D{{"email", email}}).Decode(&user)
+		if err != nil {
+			result <- responses.Response{
+				Status:  http.StatusBadRequest,
+				Message: "user does not exist",
+				Data:    map[string]interface{}{"error": err.Error()},
+			}
+			return
+		}
+
+		room.Messages = []models.MessageDB{}
+		creator := ctx.Request.Header["Email"][0]
+
+		room.Users = append(room.Users, creator)
+
 		res, err := collection.InsertOne(ctxDB, room)
 		if err != nil {
 			result <- responses.Response{
@@ -45,6 +62,31 @@ func CreateRoom(c *gin.Context) {
 				Message: "Error adding room",
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
+			return
+		}
+		roomId := res.InsertedID
+		update := bson.M{"$push": bson.M{"rooms": roomId}}
+		if creator != email {
+			_, err = usersCollection.UpdateOne(ctxDB, bson.D{{"email", email}}, update)
+			if err != nil {
+				result <- responses.Response{
+					Status:  http.StatusInternalServerError,
+					Message: "Error adding room to user",
+					Data:    map[string]interface{}{"error": err.Error()},
+				}
+				return
+			}
+		}
+		_, err = usersCollection.UpdateOne(ctxDB, bson.D{{"email", creator}}, update)
+		if err != nil {
+			result <- responses.Response{
+				Status:  http.StatusInternalServerError,
+				Message: "Error adding room to user",
+				Data:    map[string]interface{}{"error": err.Error()},
+			}
+			return
+		}
+		if err != nil {
 			return
 		}
 		result <- responses.Response{
