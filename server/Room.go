@@ -4,6 +4,7 @@ import (
 	"chat/models"
 	"chat/service"
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -42,6 +43,7 @@ func (r *Room) AddClient(client *Client) {
 	if err != nil {
 		return
 	}
+	fmt.Println(client)
 	r.Clients[client] = true
 }
 func (r *Room) RemoveClient(client *Client) {

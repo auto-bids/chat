@@ -60,15 +60,16 @@ func (c *Client) subscribeRoom(roomId string) error {
 	filter := bson.D{{"_id", id}, {"users", c.UserID}}
 	err := roomCollection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
-		fmt.Println("ta")
 		return err
 	}
 	room := c.Server.GetRoom(roomId)
 	if room == nil {
 		c.Server.AddRoom(roomId)
+		room = c.Server.GetRoom(roomId)
 	}
 	c.Rooms[roomId] = room
 	room.AddUser <- c
+	fmt.Println(room)
 	return nil
 }
 func (c *Client) unsubscribeRoom(roomId string) error {

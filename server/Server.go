@@ -14,7 +14,7 @@ func CreateServer() *Server {
 func (s *Server) AddRoom(id string) *Room {
 	room := CreateRoom(id, s)
 	go room.RunRoom()
-	s.Rooms[room.id] = room
+	s.Rooms[id] = room
 	return room
 }
 func (s *Server) RemoveRoom(id string) {

@@ -14,6 +14,6 @@ type PostPrivateRoomDB struct {
 
 type PostRoomDB struct {
 	Name     string      `bson:"name" json:"name"`
-	Users    []string    `bson:"users" json:"users" validate:"required,min=1,max=1,email"`
+	Users    []string    `bson:"users" json:"users" validate:"required,min=1,max=1"`
 	Messages []MessageDB `bson:"messages" json:"messages"`
 }
