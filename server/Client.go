@@ -4,7 +4,6 @@ import (
 	"chat/models"
 	"chat/service"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson"
@@ -69,7 +68,6 @@ func (c *Client) subscribeRoom(roomId string) error {
 	}
 	c.Rooms[roomId] = room
 	room.AddUser <- c
-	fmt.Println(room)
 	return nil
 }
 func (c *Client) unsubscribeRoom(roomId string) error {
