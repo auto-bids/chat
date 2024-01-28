@@ -48,6 +48,7 @@ func CreateUser(ctx *gin.Context) {
 			}
 			return
 		}
+		user.Rooms = []string{}
 		res, err := userCollection.InsertOne(ctxDB, user)
 		if err != nil {
 			result <- responses.Response{

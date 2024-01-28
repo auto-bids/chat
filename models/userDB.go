@@ -9,5 +9,5 @@ type UserDB struct {
 type PostUserDB struct {
 	Username string   `json:"username" bson:"username" validate:"required"`
 	Email    string   `json:"email" bson:"email" validate:"required,email"`
-	Rooms    []string `json:"rooms" bson:"rooms" validate:"required"`
+	Rooms    []string `json:"rooms" bson:"rooms"`
 }
