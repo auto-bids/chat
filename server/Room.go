@@ -69,13 +69,11 @@ func (r *Room) sendMessage(message *Message) {
 		data := models.MessageDB{Sender: message.Sender, Message: message.Message, Time: time.Now().Unix()}
 		update := bson.M{"$push": bson.M{"messages": data}}
 		_, err := roomCollection.UpdateOne(ctx, filter, update)
-		//TODO - result
 		if err == nil {
 			for client := range r.Clients {
 				client.WriteMess <- *MessageToByte(message)
 			}
 		} else {
-			//TODO - responses
 			r.GetClient(message.Sender).WriteMess <- []byte("error")
 		}
 	}
