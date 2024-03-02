@@ -1,4 +1,4 @@
-FROM golang:1.21
+FROM golang:1.21-alpine
 
 WORKDIR /app
 
@@ -10,6 +10,6 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /chat
 
-EXPOSE 8080
+EXPOSE 4500
 
 CMD ["/chat"]
