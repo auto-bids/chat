@@ -6,8 +6,8 @@ import (
 	"chat/server"
 	"chat/service"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,13 +27,20 @@ var Upgrader = websocket.Upgrader{
 func addUserToDb(ctx *gin.Context) (*mongo.InsertOneResult, error) {
 	email := ctx.Query("email")
 	username := ctx.Query("username")
-	fmt.Println(email, username)
+
 	ctxDB, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
 	var user models.PostUserDB
 	user.Email = email
 	user.Username = username
 	user.Rooms = []string{}
+
+	if err := validate.Struct(user); err != nil {
+		return nil, err
+	}
+
 	var userCollection = service.GetCollection(service.DB, "users")
 	filter := bson.D{{"email", user.Email}, {"username", user.Username}}
 	var existingUser models.UserDB
@@ -52,7 +59,7 @@ func ManageWs(s *server.Server, ctx *gin.Context) {
 	res, errAdding := addUserToDb(ctx)
 	result := responses.Response{
 		Status:  http.StatusBadRequest,
-		Message: "adding user to database not succeded",
+		Message: "adding user to database failed",
 		Data:    map[string]interface{}{"data": res},
 	}
 	if errAdding != nil {

@@ -51,6 +51,7 @@ func (c *Client) sendToRoom(mess *Message) {
 	c.Rooms[mess.Destination].Broadcast <- mess
 }
 func (c *Client) subscribeRoom(roomId string) error {
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var user models.UserDB

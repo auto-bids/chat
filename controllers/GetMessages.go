@@ -15,6 +15,7 @@ import (
 func GetMessages(ctx *gin.Context) {
 	result := make(chan responses.Response)
 	go func(c *gin.Context) {
+
 		ctxDB, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer close(result)
 		defer cancel()
@@ -30,7 +31,7 @@ func GetMessages(ctx *gin.Context) {
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
 		}
-		filter := bson.D{{"_id", id}, {"users", bson.D{{"$elemMatch",email}}}}
+		filter := bson.D{{"_id", id}, {"users", bson.D{{"$elemMatch", email}}}}
 		err = roomCollection.FindOne(ctxDB, filter).Decode(&room)
 		if err != nil {
 			result <- responses.Response{
