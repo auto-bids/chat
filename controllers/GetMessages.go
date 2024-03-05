@@ -20,7 +20,9 @@ func GetMessages(ctx *gin.Context) {
 		defer cancel()
 		var room models.RoomDB
 		roomCollection := service.GetCollection(service.DB, "rooms")
-		id, err := primitive.ObjectIDFromHex(c.Param("id"))
+		id, err := primitive.ObjectIDFromHex(ctx.Query("id"))
+		email := ctx.Query("email")
+
 		if err != nil {
 			result <- responses.Response{
 				Status:  http.StatusInternalServerError,
@@ -28,7 +30,7 @@ func GetMessages(ctx *gin.Context) {
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
 		}
-		filter := bson.D{{"_id", id}}
+		filter := bson.D{{"_id", id}, {"users", bson.D{{"$elemMatch",email}}}}
 		err = roomCollection.FindOne(ctxDB, filter).Decode(&room)
 		if err != nil {
 			result <- responses.Response{

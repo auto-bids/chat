@@ -51,7 +51,7 @@ func CreateRoom(c *gin.Context) {
 		}
 
 		room.Messages = []models.MessageDB{}
-		creator := ctx.Request.Header["Email"][0]
+		creator := ctx.Query("creator")
 
 		room.Users = append(room.Users, creator)
 

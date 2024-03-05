@@ -15,6 +15,5 @@ func main() {
 	app.GET("/chat/:id", controllers.GetMessages)
 	app.POST("/chat/addroom", controllers.CreateRoom)
 	app.POST("/chat/adduser", controllers.CreateUser)
-	log.Fatal(app.Run(os.Getenv("PORT")))
-
+	log.Fatal(app.Run(":" + os.Getenv("PORT")))
 }

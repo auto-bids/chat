@@ -34,13 +34,13 @@ var (
 )
 
 func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
-	email := ctx.Request.Header["Email"][0]
+
 	return &Client{
 		Socket:    socket,
 		Close:     make(chan string),
 		Rooms:     make(map[string]*Room),
 		WriteMess: make(chan []byte),
-		UserID:    email,
+		UserID:    ctx.Query("email"),
 	}
 }
 func (c *Client) sendToRoom(mess *Message) {
