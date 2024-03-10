@@ -34,7 +34,6 @@ func GetMessages(ctx *gin.Context) {
 			}
 		}
 		pipeline := bson.A{
-			// Stage to unwind the array
 			bson.D{{"$match", bson.D{{"_id", id}}}},
 			bson.D{{"$unwind", "$messages"}},
 			bson.D{{"$sort", bson.D{{"messages.Time", 1}}}},

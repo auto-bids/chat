@@ -50,6 +50,39 @@ func (c *Client) sendToRoom(mess *Message) {
 	}
 	c.Rooms[mess.Destination].Broadcast <- mess
 }
+func (c *Client) createRoom(target string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	roomCollection := service.GetCollection(service.DB, "rooms")
+	var usersCollection = service.GetCollection(service.DB, "users")
+	errFind := usersCollection.FindOne(ctx, bson.D{{"email", target}})
+	if errFind.Err() != nil {
+		return errFind.Err()
+	}
+	filter := bson.D{{"users", bson.D{{"$all", bson.A{c.UserID, target}}}}}
+	var room models.RoomDB
+	err := roomCollection.FindOne(ctx, filter).Decode(&room)
+	if err != nil {
+		var roomInsert models.PostRoomDB
+		roomInsert.Users = append(room.Users, c.UserID, target)
+		roomInsert.Messages = []models.MessageDB{}
+		res, errIns := roomCollection.InsertOne(ctx, roomInsert)
+		if errIns != nil {
+			return errIns
+		}
+		id := res.InsertedID.(primitive.ObjectID)
+		room.Id = id.Hex()
+	}
+	roomDB := c.Server.GetRoom(room.Id)
+	if roomDB == nil {
+		c.Server.AddRoom(room.Id)
+		roomDB = c.Server.GetRoom(room.Id)
+	}
+	c.Rooms[room.Id] = roomDB
+	roomDB.AddUser <- c
+	return nil
+}
+
 func (c *Client) subscribeRoom(roomId string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -108,6 +141,8 @@ func (c *Client) ReadPump() {
 			c.unsubscribeRoom(mess.Destination)
 		case "message":
 			c.sendToRoom(mess)
+		case "create":
+			c.createRoom(mess.Destination)
 		default:
 		}
 		time.Sleep(time.Millisecond)
