@@ -25,8 +25,8 @@ var Upgrader = websocket.Upgrader{
 }
 
 func addUserToDb(ctx *gin.Context) (*mongo.InsertOneResult, error) {
-	email := ctx.Query("email")
-	username := ctx.Query("username")
+	email := ctx.Param("email")
+	username := ctx.Param("username")
 
 	ctxDB, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

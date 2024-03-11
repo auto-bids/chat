@@ -17,8 +17,8 @@ import (
 func GetMessages(ctx *gin.Context) {
 	result := make(chan responses.Response)
 	go func(c *gin.Context) {
-		//email := ctx.Query("email")
-		page, err := strconv.ParseInt(ctx.Query("page"), 10, 64)
+		email := ctx.Param("email")
+		page, err := strconv.ParseInt(ctx.Param("page"), 10, 64)
 		ctxDB, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer close(result)
 		defer cancel()
