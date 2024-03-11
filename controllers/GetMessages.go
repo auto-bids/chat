@@ -23,7 +23,6 @@ func GetMessages(ctx *gin.Context) {
 		defer cancel()
 		roomCollection := service.GetCollection(service.DB, "rooms")
 		id, err := primitive.ObjectIDFromHex(ctx.Param("id"))
-
 		if err != nil {
 			result <- responses.Response{
 				Status:  http.StatusInternalServerError,

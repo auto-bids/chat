@@ -71,6 +71,14 @@ func (c *Client) createRoom(target string) error {
 			return errIns
 		}
 		id := res.InsertedID.(primitive.ObjectID)
+		if target != c.UserID {
+			update := bson.M{"$push": bson.M{"rooms": id}}
+			_, err = usersCollection.UpdateOne(ctx, bson.D{{"email", c.UserID}}, update)
+			if err != nil {
+				c.WriteMess <- []byte(err.Error())
+			}
+
+		}
 		room.Id = id.Hex()
 	}
 	roomDB := c.Server.GetRoom(room.Id)

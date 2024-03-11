@@ -12,3 +12,7 @@ type PostUserDB struct {
 	Email    string   `json:"email" bson:"email" validate:"required,email"`
 	Rooms    []string `json:"rooms" bson:"rooms"`
 }
+
+type UserRooms struct {
+	Id string `json:"id" bson:"id"`
+}
