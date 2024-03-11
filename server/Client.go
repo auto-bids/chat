@@ -40,7 +40,7 @@ func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
 		Close:     make(chan string),
 		Rooms:     make(map[string]*Room),
 		WriteMess: make(chan []byte),
-		UserID:    ctx.Query("email"),
+		UserID:    ctx.Param("email"),
 	}
 }
 func (c *Client) sendToRoom(mess *Message) {
@@ -55,9 +55,9 @@ func (c *Client) createRoom(target string) error {
 	defer cancel()
 	roomCollection := service.GetCollection(service.DB, "rooms")
 	var usersCollection = service.GetCollection(service.DB, "users")
-	errFind := usersCollection.FindOne(ctx, bson.D{{"email", target}})
-	if errFind.Err() != nil {
-		return errFind.Err()
+	errFind := usersCollection.FindOne(ctx, bson.D{{"email", target}}).Err()
+	if errFind != nil {
+		return errFind
 	}
 	filter := bson.D{{"users", bson.D{{"$all", bson.A{c.UserID, target}}}}}
 	var room models.RoomDB
