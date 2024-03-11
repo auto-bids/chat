@@ -5,7 +5,6 @@ import (
 	"chat/responses"
 	"chat/service"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,9 +21,8 @@ func GetMessages(ctx *gin.Context) {
 		ctxDB, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer close(result)
 		defer cancel()
-		//var room models.RoomDB
 		roomCollection := service.GetCollection(service.DB, "rooms")
-		id, err := primitive.ObjectIDFromHex(ctx.Query("id"))
+		id, err := primitive.ObjectIDFromHex(ctx.Param("id"))
 
 		if err != nil {
 			result <- responses.Response{
@@ -32,6 +30,17 @@ func GetMessages(ctx *gin.Context) {
 				Message: "Invalid Id",
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
+			return
+		}
+		filterUser := bson.D{{"_id", id}, {"users", email}}
+		err = roomCollection.FindOne(ctxDB, filterUser).Err()
+		if err != nil {
+			result <- responses.Response{
+				Status:  http.StatusInternalServerError,
+				Message: "Invalid Id",
+				Data:    map[string]interface{}{"error": err.Error()},
+			}
+			return
 		}
 		pipeline := bson.A{
 			bson.D{{"$match", bson.D{{"_id", id}}}},
@@ -42,20 +51,13 @@ func GetMessages(ctx *gin.Context) {
 		}
 		cursor, err := roomCollection.Aggregate(ctxDB, pipeline)
 		var results []models.MessageUnwindDB
-		for cursor.Next(context.Background()) {
-			var result bson.M
-			err := cursor.Decode(&result)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(result)
-		}
 		if err != nil {
 			result <- responses.Response{
 				Status:  http.StatusNotFound,
 				Message: "room not found",
 				Data:    map[string]interface{}{"error": err.Error()},
 			}
+			return
 		}
 		if err = cursor.All(context.TODO(), &results); err != nil {
 			panic(err)
