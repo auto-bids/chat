@@ -1,7 +1,7 @@
 package main
 
 import (
-	"chat/controllers"
+	"chat/routes"
 	"chat/server"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -11,7 +11,6 @@ import (
 func main() {
 	app := gin.Default()
 	Server := server.CreateServer()
-	app.GET("/chat/:username/:email", func(ctx *gin.Context) { controllers.ManageWs(Server, ctx) })
-	app.GET("/chat/messages/:id/:email/:page", controllers.GetMessages)
+	routes.ChatRoute(app, Server)
 	log.Fatal(app.Run(":" + os.Getenv("PORT")))
 }

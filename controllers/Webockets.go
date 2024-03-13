@@ -35,7 +35,7 @@ func addUserToDb(ctx *gin.Context) (*mongo.InsertOneResult, error) {
 	var user models.PostUserDB
 	user.Email = email
 	user.Username = username
-	user.Rooms = []string{}
+	user.Rooms = []models.UserRooms{}
 
 	if err := validate.Struct(user); err != nil {
 		return nil, err

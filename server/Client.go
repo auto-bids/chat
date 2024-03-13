@@ -4,6 +4,7 @@ import (
 	"chat/models"
 	"chat/service"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson"
@@ -55,7 +56,8 @@ func (c *Client) createRoom(target string) error {
 	defer cancel()
 	roomCollection := service.GetCollection(service.DB, "rooms")
 	var usersCollection = service.GetCollection(service.DB, "users")
-	errFind := usersCollection.FindOne(ctx, bson.D{{"email", target}}).Err()
+	var user models.PostUserDB
+	errFind := usersCollection.FindOne(ctx, bson.D{{"email", target}}).Decode(&user)
 	if errFind != nil {
 		return errFind
 	}
@@ -72,8 +74,17 @@ func (c *Client) createRoom(target string) error {
 		}
 		id := res.InsertedID.(primitive.ObjectID)
 		if target != c.UserID {
-			update := bson.M{"$push": bson.M{"rooms": id}}
+			userRoom := models.UserRooms{Id: id.Hex(), Email: target}
+			update := bson.M{"$push": bson.M{"rooms": userRoom}}
 			_, err = usersCollection.UpdateOne(ctx, bson.D{{"email", c.UserID}}, update)
+			fmt.Println(userRoom, update)
+			if err != nil {
+				c.WriteMess <- []byte(err.Error())
+			}
+			userRoom = models.UserRooms{Id: id.Hex(), Email: c.UserID}
+			update = bson.M{"$push": bson.M{"rooms": userRoom}}
+			_, err = usersCollection.UpdateOne(ctx, bson.D{{"email", target}}, update)
+			fmt.Println(userRoom, update)
 			if err != nil {
 				c.WriteMess <- []byte(err.Error())
 			}

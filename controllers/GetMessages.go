@@ -58,7 +58,7 @@ func GetMessages(ctx *gin.Context) {
 			}
 			return
 		}
-		if err = cursor.All(context.TODO(), &results); err != nil {
+		if err = cursor.All(ctxDB, &results); err != nil {
 			panic(err)
 		}
 
