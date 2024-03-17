@@ -26,7 +26,6 @@ var Upgrader = websocket.Upgrader{
 
 func addUserToDb(ctx *gin.Context) (*mongo.InsertOneResult, error) {
 	email := ctx.Param("email")
-	username := ctx.Param("username")
 
 	ctxDB, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -34,7 +33,6 @@ func addUserToDb(ctx *gin.Context) (*mongo.InsertOneResult, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	var user models.PostUserDB
 	user.Email = email
-	user.Username = username
 	user.Rooms = []models.UserRooms{}
 
 	if err := validate.Struct(user); err != nil {
@@ -42,7 +40,7 @@ func addUserToDb(ctx *gin.Context) (*mongo.InsertOneResult, error) {
 	}
 
 	var userCollection = service.GetCollection(service.DB, "users")
-	filter := bson.D{{"email", user.Email}, {"username", user.Username}}
+	filter := bson.D{{"email", user.Email}}
 	var existingUser models.UserDB
 	err := userCollection.FindOne(ctxDB, filter).Decode(&existingUser)
 
