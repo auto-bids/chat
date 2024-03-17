@@ -64,12 +64,12 @@ func ManageWs(s *server.Server, ctx *gin.Context) {
 		return
 	}
 	ws, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-	connectionError := responses.Response{
-		Status:  http.StatusBadRequest,
-		Message: "websocket connectin failed",
-		Data:    map[string]interface{}{"err": err.Error()},
-	}
 	if err != nil {
+		connectionError := responses.Response{
+			Status:  http.StatusBadRequest,
+			Message: "websocket connectin failed",
+			Data:    map[string]interface{}{"err": err.Error()},
+		}
 		ctx.JSON(connectionError.Status, connectionError)
 		return
 	}
