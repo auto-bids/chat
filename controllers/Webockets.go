@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"net/http"
 	"time"
 )
@@ -65,8 +64,13 @@ func ManageWs(s *server.Server, ctx *gin.Context) {
 		return
 	}
 	ws, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	connectionError := responses.Response{
+		Status:  http.StatusBadRequest,
+		Message: "websocket connectin failed",
+		Data:    map[string]interface{}{"err": err.Error()},
+	}
 	if err != nil {
-		log.Fatal(err)
+		ctx.JSON(connectionError.Status, connectionError)
 		return
 	}
 	client := server.NewClient(ws, ctx)
