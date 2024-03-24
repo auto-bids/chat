@@ -32,7 +32,7 @@ func GetConversations(ctx *gin.Context) {
 		}
 		result <- responses.Response{
 			Status:  http.StatusOK,
-			Message: "Invalid Id",
+			Message: "ok",
 			Data:    map[string]interface{}{"data": user},
 		}
 		return
