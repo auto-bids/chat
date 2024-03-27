@@ -17,6 +17,7 @@ func ByteToMessage(read []byte) *Message {
 	json.Unmarshal(read, &mess)
 	return &mess
 }
+
 func MessageToByte(read *Message) *[]byte {
 	byteMessage, err := json.Marshal(read)
 	if err != nil {

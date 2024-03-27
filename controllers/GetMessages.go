@@ -44,7 +44,7 @@ func GetMessages(ctx *gin.Context) {
 		pipeline := bson.A{
 			bson.D{{"$match", bson.D{{"_id", id}}}},
 			bson.D{{"$unwind", "$messages"}},
-			bson.D{{"$sort", bson.D{{"messages.Time", 1}}}},
+			bson.D{{"$sort", bson.D{{"messages.Time", -1}}}},
 			bson.D{{"$skip", page * 10}},
 			bson.D{{"$limit", 10}},
 		}
