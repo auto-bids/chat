@@ -59,7 +59,13 @@ func (c *Client) createRoom(target string) error {
 	var user models.PostUserDB
 	errFind := usersCollection.FindOne(ctx, bson.D{{"email", target}}).Decode(&user)
 	if errFind != nil {
-		return errFind
+		var user models.PostUserDB
+		user.Email = target
+		user.Rooms = []models.UserRooms{}
+		_, err := usersCollection.InsertOne(ctx, user)
+		if err != nil {
+			c.WriteMess <- []byte(err.Error())
+		}
 	}
 	filter := bson.D{{"users", bson.D{{"$all", bson.A{c.UserID, target}}}}}
 	var room models.RoomDB
@@ -84,7 +90,6 @@ func (c *Client) createRoom(target string) error {
 			userRoom = models.UserRooms{Id: id.Hex(), Email: c.UserID}
 			update = bson.M{"$push": bson.M{"rooms": userRoom}}
 			_, err = usersCollection.UpdateOne(ctx, bson.D{{"email", target}}, update)
-			fmt.Println(userRoom, update)
 			if err != nil {
 				c.WriteMess <- []byte(err.Error())
 			}
