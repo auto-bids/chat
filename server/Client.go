@@ -93,7 +93,6 @@ func (c *Client) createRoom(target string) error {
 			if err != nil {
 				c.WriteMess <- []byte(err.Error())
 			}
-
 		}
 		room.Id = id.Hex()
 	}
