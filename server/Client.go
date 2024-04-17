@@ -35,7 +35,6 @@ var (
 )
 
 func NewClient(socket *websocket.Conn, ctx *gin.Context) *Client {
-
 	return &Client{
 		Socket:    socket,
 		Close:     make(chan string),
@@ -166,9 +165,7 @@ func (c *Client) ReadPump() {
 			c.sendToRoom(mess)
 		case "create":
 			c.createRoom(mess.Destination)
-		default:
 		}
-		time.Sleep(time.Millisecond)
 	}
 }
 func (c *Client) WritePump() {
@@ -190,7 +187,6 @@ func (c *Client) WritePump() {
 				return
 			}
 			w.Write(message)
-
 			n := len(c.WriteMess)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
@@ -205,6 +201,5 @@ func (c *Client) WritePump() {
 				return
 			}
 		}
-		time.Sleep(time.Millisecond)
 	}
 }

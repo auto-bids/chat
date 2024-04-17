@@ -92,9 +92,7 @@ func (r *Room) RunRoom() {
 			}
 		case <-r.Stop:
 			return
-		default:
 		}
-		time.Sleep(time.Millisecond)
 	}
 
 }
